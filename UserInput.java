@@ -1,3 +1,7 @@
+//create a mortgage calculator program that takes user input and returns the monthly mortgage
+//than upgrade the calculator for data validation on user input
+//advance the calculator such that it prints all the balances for the number of payments you have made
+//refactor it to an OOP design
 public class UserInput {
     public static double readNumber(String prompt, double min, double max){
 
