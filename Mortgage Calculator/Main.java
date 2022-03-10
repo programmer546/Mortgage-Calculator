@@ -6,50 +6,78 @@ import java.text.NumberFormat;
 import java.util.Scanner;
 
 public class Main {
+    final static int MONTHS_IN_YEAR = 12;
+    final static int PERCENT = 100;
 
     public static void main(String[] args) {
-        final int MONTHS_IN_YEAR = 12;
-        final int PERCENT = 100;
+        int principal = (int) readNumber("Principal: ", 1000, 1_000_000);
+        double annualInterest = (double) readNumber("Annual Interest Rate: ", 1, 30);
+        int years = (int) readNumber("Period (Years): ", 1, 30);
 
-        int principal = 0;
-        double monthlyInterest = 0;
-        int numberOfPayments = 0;
+        printMortgage(principal, annualInterest, years);
+        printPaymentSchedule(principal, annualInterest, years);
+    }
 
+    private static void printMortgage(int principal, double annualInterest, int years) {
+        double mortgage = calculateMortgage(principal, annualInterest, years);
+        String mortgageView = NumberFormat.getCurrencyInstance().format(mortgage);
+        System.out.println();
+        System.out.println("MORTGAGE");
+        System.out.println("--------");
+        System.out.println("Monthly Payments: " + mortgageView);
+    }
+
+    private static void printPaymentSchedule(int principal, double annualInterest, int years) {
+        System.out.println();
+        System.out.println("PAYMENT SCHEDULE");
+        System.out.println("----------------");
+        for (short month = 1; month <= years * MONTHS_IN_YEAR; month++) {
+            double balance = calculateBalance(principal, annualInterest, years, month);
+            System.out.println(NumberFormat.getCurrencyInstance().format(balance));
+        }
+    }
+
+    public static double readNumber(String prompt, double min, double max) {
         Scanner scanner = new Scanner(System.in);
-
+        double value;
         while (true) {
-            System.out.print("Principal: ");
-            principal = scanner.nextInt();
-            if (principal >= 1000 && principal <= 1_000_000)
+            System.out.print(prompt);
+            value = scanner.nextDouble();
+            if (value >= min && value <= max)
                 break;
-            System.out.println("Enter a value between 1000 and 1000000");
+            System.out.println("Enter a value between " + min + " and " + max);
         }
+        return value;
+    }
 
-        while (true) {
-            System.out.print("Annual Interest Rate: ");
-            double annualInterest = scanner.nextDouble();
-            if (annualInterest >= 1 && annualInterest <= 30) {
-                monthlyInterest = annualInterest / PERCENT / MONTHS_IN_YEAR;
-                break;
-            }
-            System.out.println("Enter a value between 1 and 30");
-        }
+    public static double calculateBalance(
+            int principal,
+            double annualInterest,
+            int years,
+            short numberOfPaymentsMade
+    ) {
+        double monthlyInterest = annualInterest / PERCENT / MONTHS_IN_YEAR;
+        double numberOfPayments = years * MONTHS_IN_YEAR;
 
-        while (true) {
-            System.out.print("Period (Years): ");
-            int years = scanner.nextInt();
-            if (years >= 1 && years <= 30) {
-                numberOfPayments = years * MONTHS_IN_YEAR;
-                break;
-            }
-            System.out.println("Enter a value between 1 and 30.");
-        }
+        double balance = principal
+                * (Math.pow(1 + monthlyInterest, numberOfPayments) - Math.pow(1 + monthlyInterest, numberOfPaymentsMade))
+                / (Math.pow(1 + monthlyInterest, numberOfPayments) - 1);
+
+        return balance;
+    }
+
+    public static double calculateMortgage(
+            int principal,
+            double annualInterest,
+            int years) {
+
+        double monthlyInterest = annualInterest / PERCENT / MONTHS_IN_YEAR;
+        double numberOfPayments = years * MONTHS_IN_YEAR;
 
         double mortgage = principal
                 * (monthlyInterest * Math.pow(1 + monthlyInterest, numberOfPayments))
                 / (Math.pow(1 + monthlyInterest, numberOfPayments) - 1);
 
-        String mortgageView = NumberFormat.getCurrencyInstance().format(mortgage);
-        System.out.println("Mortgage: " + mortgageView);
+        return mortgage;
     }
 }
